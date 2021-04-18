@@ -123,6 +123,24 @@ struct VAO
     GLuint programHandle;
 };
 
+struct Submesh
+{
+    VertexBufferLayout vertexBufferLayout;
+    std::vector<float> vertices;
+    std::vector<u32> indices;
+    u32 vertexOffset;
+    u32 indexOffset;
+
+    std::vector<VAO> vaos;
+};
+
+struct Mesh
+{
+    std::vector<Submesh> submeshes;
+    GLuint vertexBufferHandle;
+    GLuint indexBufferHandle;
+};
+
 void Init(App* app);
 
 void Gui(App* app);

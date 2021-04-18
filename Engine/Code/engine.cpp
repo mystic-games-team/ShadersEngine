@@ -99,17 +99,18 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
     program.programName = programName;
     program.lastWriteTimestamp = GetFileLastWriteTimestamp(filepath);
 
-    int attributesCount;
-    glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributesCount);
-    for (int i = 0; i < attributesCount; ++i) {
-        int attributeNameLength, attributeSize;
-        unsigned int attributeType;
-        char attributeName[30];
+    //int attributesCount;
+    //glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributesCount);
+    //for (int i = 0; i < attributesCount; ++i) {
+    //    GLsizei attributeNameLength;
+    //    GLint attributeSize;
+    //    unsigned int attributeType;
+    //    char attributeName[30];
 
-        glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
+    //    glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
 
-        program.vertexInputLayout.attributes.push_back({glGetAttribLocation(program.handle, attributeName), attributeSize });
-    }
+    //    program.vertexInputLayout.attributes.push_back({ (u8)glGetAttribLocation(program.handle, attributeName),(u8)attributeSize });
+    //}
 
     app->programs.push_back(program);
 
@@ -193,7 +194,7 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-    app->mode = Mode_TexturedQuad;
+    app->mode = Mode_Mesh;
 
     switch (app->mode) {
     case Mode_TexturedQuad: {
@@ -247,11 +248,11 @@ void Init(App* app)
         vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0,3,0 });
         vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2,2,3 * sizeof(float) });
 
-        Submesh submesh = {};
-        submesh.vertexBufferLayout = vertexBufferLayout;
-        submesh.vertices.swap(vertices);
-        submesh.indices.swap(indices);
-        myMesh->submeshes.push_back(submesh);
+        //Submesh submesh = {};
+        //submesh.vertexBufferLayout = vertexBufferLayout;
+        //submesh.vertices.swap(vertices);
+        //submesh.indices.swap(indices);
+        //myMesh->submeshes.push_back(submesh);
 
         app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];

@@ -230,6 +230,16 @@ void Init(App* app)
         break; }
     case Mode_Mesh: {
 
+        VertexBufferLayout vertexBufferLayout = {};
+        vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0,3,0 });
+        vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2,2,3 * sizeof(float) });
+
+        Submesh submesh = {};
+        submesh.vertexBufferLayout = vertexBufferLayout;
+        submesh.vertices.swap(vertices);
+        submesh.indices.swap(indices);
+        myMesh->submeshes.push_back(submesh);
+
         app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position

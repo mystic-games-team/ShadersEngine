@@ -194,6 +194,21 @@ void Gui(App* app)
 {
     ImGui::Begin("Info");
     ImGui::Text("FPS: %f", 1.0f/app->deltaTime);
+    ImGui::Text("OpenGL Version: %s", glGetString(GL_VERSION));
+    ImGui::Text("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+    ImGui::Text("OpenGL Vendor: %s", glGetString(GL_VENDOR));
+    ImGui::Text("OpenGL GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 2.5F));
+    ImGui::AlignTextToFramePadding();
+    ImGui::PopStyleVar();
+    if (ImGui::TreeNodeEx("OpenGL Extensions", ImGuiTreeNodeFlags_SpanAvailWidth)) {
+        GLint numExtensions;
+        glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+        for (int i = 0; i < numExtensions; ++i) {
+            ImGui::Text((const char*)glGetStringi(GL_EXTENSIONS, i));
+        }
+        ImGui::TreePop();
+    }
     ImGui::End();
 }
 

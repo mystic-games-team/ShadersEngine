@@ -85,6 +85,12 @@ struct App
     GLuint vao;
 };
 
+struct VertexV3V2
+{
+    glm::vec3 pos;
+    glm::vec2 uv;
+};
+
 void Init(App* app);
 
 void Gui(App* app);

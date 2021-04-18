@@ -44,53 +44,6 @@ enum Mode
     Mode_Count
 };
 
-struct App
-{
-    // Loop
-    f32  deltaTime;
-    bool isRunning;
-
-    // Input
-    Input input;
-
-    // Graphics
-    char gpuName[64];
-    char openGlVersion[64];
-
-    ivec2 displaySize;
-
-    std::vector<Texture>  textures;
-    std::vector<Program>  programs;
-    std::vector<Material> materials;
-    std::vector<Mesh>     meshes;
-    std::vector<Model>    models;
-
-    // program indices
-    u32 texturedGeometryProgramIdx;
-    u32 texturedMeshProgramIdx;
-    
-    // texture indices
-    u32 diceTexIdx;
-    u32 whiteTexIdx;
-    u32 blackTexIdx;
-    u32 normalTexIdx;
-    u32 magentaTexIdx;
-
-    // Mode
-    Mode mode;
-
-    // Embedded geometry (in-editor simple meshes such as
-    // a screen filling quad, a cube, a sphere...)
-    GLuint embeddedVertices;
-    GLuint embeddedElements;
-
-    // Location of the texture uniform in the textured quad shader
-    GLuint programUniformTexture;
-
-    // VAO object to link our screen filling quad with our textured quad shader
-    GLuint vao;
-};
-
 struct Model
 {
     u32 meshIdx;
@@ -163,6 +116,54 @@ struct Mesh
     GLuint vertexBufferHandle;
     GLuint indexBufferHandle;
 };
+
+struct App
+{
+    // Loop
+    f32  deltaTime;
+    bool isRunning;
+
+    // Input
+    Input input;
+
+    // Graphics
+    char gpuName[64];
+    char openGlVersion[64];
+
+    ivec2 displaySize;
+
+    std::vector<Texture>  textures;
+    std::vector<Program>  programs;
+    std::vector<Material> materials;
+    std::vector<Mesh>     meshes;
+    std::vector<Model>    models;
+
+    // program indices
+    u32 texturedGeometryProgramIdx;
+    u32 texturedMeshProgramIdx;
+
+    // texture indices
+    u32 diceTexIdx;
+    u32 whiteTexIdx;
+    u32 blackTexIdx;
+    u32 normalTexIdx;
+    u32 magentaTexIdx;
+
+    // Mode
+    Mode mode;
+
+    // Embedded geometry (in-editor simple meshes such as
+    // a screen filling quad, a cube, a sphere...)
+    GLuint embeddedVertices;
+    GLuint embeddedElements;
+
+    // Location of the texture uniform in the textured quad shader
+    GLuint programUniformTexture;
+
+    // VAO object to link our screen filling quad with our textured quad shader
+    GLuint vao;
+};
+
 
 void Init(App* app);
 

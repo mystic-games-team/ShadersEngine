@@ -60,6 +60,9 @@ struct App
 
     std::vector<Texture>  textures;
     std::vector<Program>  programs;
+    std::vector<Material> materials;
+    std::vector<Mesh>     meshes;
+    std::vector<Model>    models;
 
     // program indices
     u32 texturedGeometryProgramIdx;
@@ -85,6 +88,25 @@ struct App
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
+};
+
+struct Model
+{
+    u32 meshIdx;
+    std::vector<u32> materialIdx;
+};
+
+struct Material 
+{
+    std::string name;
+    vec3 albedo;
+    vec3 emissive;
+    f32 smothness;
+    u32 albedoTextureIdx;
+    u32 emissiveTextureIdx;
+    u32 specularTextureIdx;
+    u32 normalsTextureIdx;
+    u32 bumpTextureIdx;
 };
 
 struct VertexV3V2

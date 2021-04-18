@@ -231,9 +231,9 @@ void Init(App* app)
         break; }
     case Mode_Mesh: {
 
-        VertexBufferLayout vertexBufferLayout = {};
-        vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0,3,0 });
-        vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2,2,3 * sizeof(float) });
+        //VertexBufferLayout vertexBufferLayout = {};
+        //vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0,3,0 });
+        //vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2,2,3 * sizeof(float) });
 
         //Submesh submesh = {};
         //submesh.vertexBufferLayout = vertexBufferLayout;
@@ -245,9 +245,8 @@ void Init(App* app)
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
-        Program& texturedGeometryProgram = app->programs[app->texturedMeshProgramIdx];
-        app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
         app->model = LoadModel(app, "Patrick/Patrick.obj");
         break; }
     }

@@ -248,7 +248,7 @@ void Init(App* app)
 
         Program& texturedGeometryProgram = app->programs[app->texturedMeshProgramIdx];
         app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
-        app->model = LoadModel(app, "Patrick/Patrick.mtl");
+        app->model = LoadModel(app, "Patrick/Patrick.obj");
         break; }
     }
 }
@@ -282,15 +282,14 @@ void Update(App* app)
 
 void Render(App* app)
 {
+    glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, app->displaySize.x, app->displaySize.y);
     switch (app->mode)
     {
 
         case Mode_TexturedQuad: {
-            glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
-
             Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
             glUseProgram(programTexturedGeometry.handle);
             glBindVertexArray(app->vao);
@@ -304,9 +303,6 @@ void Render(App* app)
             glBindTexture(GL_TEXTURE_2D, textureHandle);
 
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-
-            glBindVertexArray(0);
-            glUseProgram(0);
             break; }
         case Mode_Mesh: {
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -334,6 +330,8 @@ void Render(App* app)
             break; }
         default:;
     }
+    glBindVertexArray(0);
+    glUseProgram(0);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)

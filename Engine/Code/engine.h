@@ -149,6 +149,9 @@ struct App
     u32 normalTexIdx;
     u32 magentaTexIdx;
 
+    // Model
+    u32 model;
+
     // Mode
     Mode mode;
 
@@ -173,5 +176,7 @@ void Update(App* app);
 
 void Render(App* app);
 
-static u32 LoadTexture2D(App* app, const char* filepath);
+u32 LoadTexture2D(App* app, const char* filepath);
+
+GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program);
 

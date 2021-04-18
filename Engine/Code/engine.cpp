@@ -9,6 +9,7 @@
 #include <imgui.h>
 #include <stb_image.h>
 #include <stb_image_write.h>
+#include "assimp_model_loading.h"
 
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {
@@ -98,20 +99,6 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
     program.filepath = filepath;
     program.programName = programName;
     program.lastWriteTimestamp = GetFileLastWriteTimestamp(filepath);
-
-    //int attributesCount;
-    //glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributesCount);
-    //for (int i = 0; i < attributesCount; ++i) {
-    //    GLsizei attributeNameLength;
-    //    GLint attributeSize;
-    //    unsigned int attributeType;
-    //    char attributeName[30];
-
-    //    glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
-
-    //    program.vertexInputLayout.attributes.push_back({ (u8)glGetAttribLocation(program.handle, attributeName),(u8)attributeSize });
-    //}
-
     app->programs.push_back(program);
 
     return app->programs.size() - 1;
@@ -194,7 +181,7 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-    app->mode = Mode_Mesh;
+    app->mode = Mode::Mode_Mesh;
 
     switch (app->mode) {
     case Mode_TexturedQuad: {
@@ -258,6 +245,10 @@ void Init(App* app)
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+
+        Program& texturedGeometryProgram = app->programs[app->texturedMeshProgramIdx];
+        app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
+        app->model = LoadModel(app, "Patrick/Patrick.mtl");
         break; }
     }
 }
@@ -334,7 +325,7 @@ void Render(App* app)
 
                 glActiveTexture(GL_TEXTURE0);
                 glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-                glUniform1i(app->texturedMeshProgram_uTexture, 0);
+                glUniform1i(app->programUniformTexture, 0);
 
                 Submesh& submesh = mesh.submeshes[i];
                 glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);

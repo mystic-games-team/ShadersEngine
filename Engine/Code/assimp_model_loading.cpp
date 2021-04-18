@@ -1,4 +1,3 @@
-
 #include <assimp/cimport.h>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -178,7 +177,7 @@ u32 LoadModel(App* app, const char* filename)
 
     if (!scene)
     {
-        ELOG("Error loading mesh %s: %s", filename, aiGetErrorString());
+        //ELOG("Error loading mesh %s: %s", filename, aiGetErrorString());
         return UINT32_MAX;
     }
 

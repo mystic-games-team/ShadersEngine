@@ -39,6 +39,7 @@ struct Program
 enum Mode
 {
     Mode_TexturedQuad,
+    Mode_Mesh,
     Mode_Count
 };
 
@@ -62,6 +63,7 @@ struct App
 
     // program indices
     u32 texturedGeometryProgramIdx;
+    u32 texturedMeshProgramIdx;
     
     // texture indices
     u32 diceTexIdx;

@@ -90,7 +90,7 @@ struct VertexShaderAttribute
 
 struct VertexShaderLayout
 {
-    std::vector<VertexBufferAttribute> attributes;
+    std::vector<VertexShaderAttribute> attributes;
 };
 
 struct VAO

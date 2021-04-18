@@ -98,6 +98,19 @@ u32 LoadProgram(App* app, const char* filepath, const char* programName)
     program.filepath = filepath;
     program.programName = programName;
     program.lastWriteTimestamp = GetFileLastWriteTimestamp(filepath);
+
+    int attributesCount;
+    glGetProgramiv(program.handle, GL_ACTIVE_ATTRIBUTES, &attributesCount);
+    for (int i = 0; i < attributesCount; ++i) {
+        int attributeNameLength, attributeSize;
+        unsigned int attributeType;
+        char attributeName[30];
+
+        glGetActiveAttrib(program.handle, i, ARRAY_COUNT(attributeName), &attributeNameLength, &attributeSize, &attributeType, attributeName);
+
+        program.vertexInputLayout.attributes.push_back({glGetAttribLocation(program.handle, attributeName), attributeSize });
+    }
+
     app->programs.push_back(program);
 
     return app->programs.size() - 1;

@@ -34,6 +34,7 @@ struct Program
     std::string        filepath;
     std::string        programName;
     u64                lastWriteTimestamp; // What is this for?
+    VertexShaderLayout vertexInputLayout;
 };
 
 enum Mode

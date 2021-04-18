@@ -66,7 +66,7 @@ struct Material
     std::string name;
     vec3 albedo;
     vec3 emissive;
-    f32 smothness;
+    f32 smoothness;
     u32 albedoTextureIdx;
     u32 emissiveTextureIdx;
     u32 specularTextureIdx;
@@ -172,4 +172,6 @@ void Gui(App* app);
 void Update(App* app);
 
 void Render(App* app);
+
+static u32 LoadTexture2D(App* app, const char* filepath);
 

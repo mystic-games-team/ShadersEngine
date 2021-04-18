@@ -91,6 +91,36 @@ struct VertexV3V2
     glm::vec2 uv;
 };
 
+struct VertexBufferAttribute
+{
+    u8 location;
+    u8 componentCount;
+    u8 offset;
+};
+
+struct VertexBufferLayout
+{
+    std::vector<VertexBufferAttribute> attributes;
+    u8 stride;
+};
+
+struct VertexShaderAttribute
+{
+    u8 location;
+    u8 componentCount;
+};
+
+struct VertexShaderLayout
+{
+    std::vector<VertexBufferAttribute> attributes;
+};
+
+struct VAO
+{
+    GLuint handle;
+    GLuint programHandle;
+};
+
 void Init(App* app);
 
 void Gui(App* app);

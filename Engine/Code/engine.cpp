@@ -281,14 +281,14 @@ void Update(App* app)
 
 void Render(App* app)
 {
+    glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glViewport(0, 0, app->displaySize.x, app->displaySize.y);
+
     switch (app->mode)
     {
         case Mode_TexturedQuad: {
-            glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            glViewport(0, 0, app->displaySize.x, app->displaySize.y);
-
             Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
             glUseProgram(programTexturedGeometry.handle);
             glBindVertexArray(app->vao);

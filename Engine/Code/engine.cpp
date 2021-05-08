@@ -246,8 +246,13 @@ void Init(App* app)
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
         app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+        app->programUniformCameraMatrix = glGetUniformLocation(texturedMeshProgram.handle, "cameraMatrix");
+        app->programUniformModelMatrix = glGetUniformLocation(texturedMeshProgram.handle, "modelMatrix");
 
-        app->model = LoadModel(app, "Patrick/Patrick.obj");
+        app->patrick = LoadModel(app, "Patrick/Patrick.obj");
+
+        app->entities.emplace_back(vec3(3.0F, 0.0F, -3.0F), vec3(1.0F, 1.0F, 1.0F), app->patrick);
+        app->entities.emplace_back(vec3(-3.0F, 0.0F, -3.0F), vec3(1.0F, 1.0F, 1.0F), app->patrick);
         break; }
     }
 }
@@ -307,25 +312,30 @@ void Render(App* app)
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(textureMeshProgram.handle);
 
-            Model& model = app->models[app->model];
-            Mesh& mesh = app->meshes[model.meshIdx];
+            for (auto item = app->entities.begin(); item != app->entities.end(); ++item) {
 
-            for (u32 i = 0; i < mesh.submeshes.size(); ++i)
-            {
-                GLuint vao = FindVAO(mesh, i, textureMeshProgram);
-                glBindVertexArray(vao);
+                glUniformMatrix4fv(app->programUniformModelMatrix, 1, GL_FALSE, glm::value_ptr((*item).mat));
+                glUniformMatrix4fv(app->programUniformCameraMatrix, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0F))); // TODO: crear be la camera i passar aqui la seva matrix
 
-                u32 submeshMaterialIdx = model.materialIdx[i];
-                Material& submeshMaterial = app->materials[submeshMaterialIdx];
+                Model& model = app->models[(*item).model];
+                Mesh& mesh = app->meshes[model.meshIdx];
 
-                glActiveTexture(GL_TEXTURE0);
-                glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
-                glUniform1i(app->programUniformTexture, 0);
+                for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+                {
+                    GLuint vao = FindVAO(mesh, i, textureMeshProgram);
+                    glBindVertexArray(vao);
 
-                Submesh& submesh = mesh.submeshes[i];
-                glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                    u32 submeshMaterialIdx = model.materialIdx[i];
+                    Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+                    glUniform1i(app->programUniformTexture, 0);
+
+                    Submesh& submesh = mesh.submeshes[i];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                }
             }
-
             break; }
         default:;
     }

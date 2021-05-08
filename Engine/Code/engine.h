@@ -39,6 +39,13 @@ struct VertexShaderLayout
     std::vector<VertexShaderAttribute> attributes;
 };
 
+struct Entity {
+    glm::mat4 mat = glm::mat4(1.0f);
+    u32 model;
+
+    Entity(const glm::vec3& pos, const glm::vec3& scale, u32 model) : mat(glm::translate(pos) * glm::scale(scale)), model(model) {}
+};
+
 struct Program
 {
     GLuint             handle;
@@ -150,7 +157,7 @@ struct App
     u32 magentaTexIdx;
 
     // Model
-    u32 model;
+    u32 patrick;
 
     // Mode
     Mode mode;
@@ -162,9 +169,13 @@ struct App
 
     // Location of the texture uniform in the textured quad shader
     GLuint programUniformTexture;
+    GLuint programUniformModelMatrix;
+    GLuint programUniformCameraMatrix;
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
+
+    std::vector<Entity> entities;
 };
 
 

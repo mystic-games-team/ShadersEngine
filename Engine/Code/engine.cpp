@@ -353,12 +353,12 @@ void Update(App* app)
     // You can handle app->input keyboard/mouse here
     if (app->input.keys[Key::K_W] == ButtonState::BUTTON_PRESSED)
     {
-        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime * glm::sign(app->mainCam->cameraDirection.z);
+        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime;
     }
 
     if (app->input.keys[Key::K_S] == ButtonState::BUTTON_PRESSED)
     {
-        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime * glm::sign(app->mainCam->cameraDirection.z);
+        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime;
     }
 
     if (app->input.keys[Key::K_D] == ButtonState::BUTTON_PRESSED)
@@ -369,6 +369,17 @@ void Update(App* app)
     if (app->input.keys[Key::K_A] == ButtonState::BUTTON_PRESSED)
     {
         app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
+    }
+
+    if (app->input.mouseButtons[MouseButton::LEFT] == BUTTON_PRESSED)
+    {
+        app->mainCam->yaw += app->input.mouseDelta.x;
+        app->mainCam->pitch -= app->input.mouseDelta.y;
+
+        if (app->mainCam->pitch > 89.0f)
+            app->mainCam->pitch = 89.0f;
+        if (app->mainCam->pitch < -89.0f)
+            app->mainCam->pitch = -89.0f;
     }
 
     app->mainCam->RecalcalculateViewMatrix();

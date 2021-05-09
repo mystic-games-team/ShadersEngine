@@ -134,11 +134,17 @@ struct Camera
     glm::mat4 viewMatrix;
 
     float speed = 2;
+    float yaw = -90.0f;
+    float pitch = 0;
 
     Camera()
     {
         cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-        cameraDirection = glm::normalize(cameraPos - cameraTarget);
+
+        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraDirection.y = sin(glm::radians(pitch));
+        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
         cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraDirection));
         cameraUp = glm::cross(cameraDirection, cameraRight);
         viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
@@ -146,7 +152,12 @@ struct Camera
 
     void RecalcalculateViewMatrix()
     {
-        cameraDirection = glm::vec3(0, 0, -1);
+        cameraDirection.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+        cameraDirection.y = sin(glm::radians(pitch));
+        cameraDirection.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+
+        cameraDirection = glm::normalize(cameraDirection);
+
         cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraDirection));
         cameraUp = glm::cross(cameraDirection, cameraRight);
 

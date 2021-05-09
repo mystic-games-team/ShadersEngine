@@ -309,6 +309,17 @@ void Update(App* app)
         app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
     }
 
+    if (app->input.mouseButtons[MouseButton::LEFT] == BUTTON_PRESSED)
+    {
+        app->mainCam->yaw += app->input.mouseDelta.x;
+        app->mainCam->pitch -= app->input.mouseDelta.y;
+
+        if (app->mainCam->pitch > 89.0f)
+            app->mainCam->pitch = 89.0f;
+        if (app->mainCam->pitch < -89.0f)
+            app->mainCam->pitch = -89.0f;
+    }
+
     app->mainCam->RecalcalculateViewMatrix();
 }
 

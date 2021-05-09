@@ -373,8 +373,8 @@ void Update(App* app)
 
     if (app->input.mouseButtons[MouseButton::LEFT] == BUTTON_PRESSED)
     {
-        app->mainCam->yaw += app->input.mouseDelta.x;
-        app->mainCam->pitch -= app->input.mouseDelta.y;
+        app->mainCam->yaw += app->input.mouseDelta.x * app->deltaTime * 10;
+        app->mainCam->pitch -= app->input.mouseDelta.y * app->deltaTime * 10;
 
         if (app->mainCam->pitch > 89.0f)
             app->mainCam->pitch = 89.0f;

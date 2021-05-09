@@ -291,12 +291,12 @@ void Update(App* app)
     // You can handle app->input keyboard/mouse here
     if (app->input.keys[Key::K_W] == ButtonState::BUTTON_PRESSED)
     {
-        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime * glm::sign(app->mainCam->cameraDirection.z);
+        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime;
     }
 
     if (app->input.keys[Key::K_S] == ButtonState::BUTTON_PRESSED)
     {
-        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime * glm::sign(app->mainCam->cameraDirection.z);
+        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime;
     }
 
     if (app->input.keys[Key::K_D] == ButtonState::BUTTON_PRESSED)

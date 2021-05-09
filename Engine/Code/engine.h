@@ -209,6 +209,10 @@ struct App
     std::vector<Entity> entities;
 
     Camera* mainCam = nullptr;
+
+    GLuint frameBuffer;
+    GLuint colorAttachment;
+    GLuint depthAttachment;
 };
 
 

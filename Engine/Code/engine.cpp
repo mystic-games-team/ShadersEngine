@@ -259,6 +259,68 @@ void Init(App* app)
     }
 
     app->mainCam = new Camera();
+
+
+    glGenTextures(1, &app->colorAttachment);
+    glBindTexture(GL_TEXTURE_2D, app->colorAttachment);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenTextures(1, &app->depthAttachment);
+    glBindTexture(GL_TEXTURE_2D, app->depthAttachment);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, app->displaySize.x, app->displaySize.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glGenFramebuffers(1, &app->frameBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachment, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachment, 0);
+
+    GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
+        switch (framebufferStatus) {
+        case GL_FRAMEBUFFER_UNDEFINED: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_UNSUPPORTED: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE: {
+            int i = 0;
+            break; }
+        case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS: {
+            int i = 0;
+            break; }
+        default: {
+            int i = 0;
+            break; }
+        }
+    }
+
+    glDrawBuffers(1, &app->colorAttachment);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Gui(App* app)
@@ -314,6 +376,11 @@ void Update(App* app)
 
 void Render(App* app)
 {
+    glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
+
+    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+    glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
+
     glClearColor(0.1F, 0.1F, 0.1F, 1.0F);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -375,6 +442,11 @@ void Render(App* app)
     }
     glBindVertexArray(0);
     glUseProgram(0);
+
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)

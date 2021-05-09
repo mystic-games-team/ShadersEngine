@@ -251,10 +251,12 @@ void Init(App* app)
 
         app->patrick = LoadModel(app, "Patrick/Patrick.obj");
 
-        app->entities.emplace_back(vec3(3.0F, 0.0F, -3.0F), vec3(1.0F, 1.0F, 1.0F), app->patrick);
-        app->entities.emplace_back(vec3(-3.0F, 0.0F, -3.0F), vec3(1.0F, 1.0F, 1.0F), app->patrick);
+        app->entities.emplace_back(vec3(3.0F, 0.0F, -3.0F), vec3(0.01F, 0.01F, 0.01F), app->patrick);
+        //app->entities.emplace_back(vec3(-3.0F, 0.0F, -3.0F), vec3(1.0F, 1.0F, 1.0F), app->patrick);
         break; }
     }
+
+    app->mainCam = new Camera();
 }
 
 void Gui(App* app)
@@ -265,6 +267,9 @@ void Gui(App* app)
     ImGui::Text("OpenGL Renderer: %s", glGetString(GL_RENDERER));
     ImGui::Text("OpenGL Vendor: %s", glGetString(GL_VENDOR));
     ImGui::Text("OpenGL GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    ImGui::Text("Camera Pos X: %f", app->mainCam->cameraPos.x);
+    ImGui::Text("Camera Pos Y: %f", app->mainCam->cameraPos.y);
+    ImGui::Text("Camera Pos Z: %f", app->mainCam->cameraPos.z);
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 2.5F));
     ImGui::AlignTextToFramePadding();
     ImGui::PopStyleVar();
@@ -282,6 +287,27 @@ void Gui(App* app)
 void Update(App* app)
 {
     // You can handle app->input keyboard/mouse here
+    if (app->input.keys[Key::K_W] == ButtonState::BUTTON_PRESSED)
+    {
+        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime * glm::sign(app->mainCam->cameraDirection.z);
+    }
+
+    if (app->input.keys[Key::K_S] == ButtonState::BUTTON_PRESSED)
+    {
+        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraDirection * app->deltaTime * glm::sign(app->mainCam->cameraDirection.z);
+    }
+
+    if (app->input.keys[Key::K_D] == ButtonState::BUTTON_PRESSED)
+    {
+        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
+    }
+
+    if (app->input.keys[Key::K_A] == ButtonState::BUTTON_PRESSED)
+    {
+        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
+    }
+
+    app->mainCam->RecalcalculateViewMatrix();
 }
 
 void Render(App* app)
@@ -314,11 +340,12 @@ void Render(App* app)
 
             for (auto item = app->entities.begin(); item != app->entities.end(); ++item) {
 
-                glUniformMatrix4fv(app->programUniformModelMatrix, 1, GL_FALSE, glm::value_ptr((*item).mat));
-                glUniformMatrix4fv(app->programUniformCameraMatrix, 1, GL_FALSE, glm::value_ptr(glm::mat4(1.0F))); // TODO: crear be la camera i passar aqui la seva matrix
-
                 Model& model = app->models[(*item).model];
                 Mesh& mesh = app->meshes[model.meshIdx];
+
+                glUniformMatrix4fv(app->programUniformModelMatrix, 1, GL_FALSE, glm::value_ptr((*item).mat));
+                glUniformMatrix4fv(app->programUniformCameraMatrix, 1, GL_FALSE, glm::value_ptr(app->mainCam->viewMatrix)); 
+
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {

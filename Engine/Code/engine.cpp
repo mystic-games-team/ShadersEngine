@@ -246,13 +246,15 @@ void Init(App* app)
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
         app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+        app->programUniformProjectionMatrix = glGetUniformLocation(texturedMeshProgram.handle, "projectionMatrix");
         app->programUniformCameraMatrix = glGetUniformLocation(texturedMeshProgram.handle, "cameraMatrix");
         app->programUniformModelMatrix = glGetUniformLocation(texturedMeshProgram.handle, "modelMatrix");
 
         app->patrick = LoadModel(app, "Patrick/Patrick.obj");
 
-        app->entities.emplace_back(vec3(3.0F, 0.0F, -3.0F), vec3(0.01F, 0.01F, 0.01F), app->patrick);
-        //app->entities.emplace_back(vec3(-3.0F, 0.0F, -3.0F), vec3(1.0F, 1.0F, 1.0F), app->patrick);
+        app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(0.2f, 0.2f, 0.2f), app->patrick);
+        app->entities.emplace_back(vec3(-1.5F, 0.0F, 0), vec3(0.2f, 0.2f, 0.2f), app->patrick);
+        app->entities.emplace_back(vec3(1.5F, 0.0F, 0.0F), vec3(0.2f, 0.2f, 0.2f), app->patrick);
         break; }
     }
 
@@ -299,12 +301,12 @@ void Update(App* app)
 
     if (app->input.keys[Key::K_D] == ButtonState::BUTTON_PRESSED)
     {
-        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
+        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
     }
 
     if (app->input.keys[Key::K_A] == ButtonState::BUTTON_PRESSED)
     {
-        app->mainCam->cameraPos -= app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
+        app->mainCam->cameraPos += app->mainCam->speed * app->mainCam->cameraRight * app->deltaTime;
     }
 
     app->mainCam->RecalcalculateViewMatrix();
@@ -338,14 +340,15 @@ void Render(App* app)
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(textureMeshProgram.handle);
 
+            glUniformMatrix4fv(app->programUniformProjectionMatrix, 1, GL_FALSE, glm::value_ptr(glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f)));
+            glUniformMatrix4fv(app->programUniformCameraMatrix, 1, GL_FALSE, glm::value_ptr(app->mainCam->viewMatrix));
+
             for (auto item = app->entities.begin(); item != app->entities.end(); ++item) {
 
                 Model& model = app->models[(*item).model];
                 Mesh& mesh = app->meshes[model.meshIdx];
 
                 glUniformMatrix4fv(app->programUniformModelMatrix, 1, GL_FALSE, glm::value_ptr((*item).mat));
-                glUniformMatrix4fv(app->programUniformCameraMatrix, 1, GL_FALSE, glm::value_ptr(app->mainCam->viewMatrix)); 
-
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {

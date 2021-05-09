@@ -12,12 +12,13 @@ out vec2 vTexCoord;
 
 uniform mat4 cameraMatrix;
 uniform mat4 modelMatrix;
+uniform mat4 projectionMatrix;
 
 void main() {
     vTexCoord = aTexCoord;
 
-    gl_Position = vec4(aPosition, 1.0F) * cameraMatrix * modelMatrix;
-}
+    gl_Position = projectionMatrix * cameraMatrix * modelMatrix * vec4(aPosition, 1.0F);
+} 
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 

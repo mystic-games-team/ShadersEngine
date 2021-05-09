@@ -133,11 +133,11 @@ struct Camera
     vec3 cameraUp;
     glm::mat4 viewMatrix;
 
-    float speed = 10;
+    float speed = 2;
 
     Camera()
     {
-        cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
+        cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
         cameraDirection = glm::normalize(cameraPos - cameraTarget);
         cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraDirection));
         cameraUp = glm::cross(cameraDirection, cameraRight);
@@ -146,7 +146,7 @@ struct Camera
 
     void RecalcalculateViewMatrix()
     {
-        cameraDirection = glm::normalize(cameraPos - cameraTarget);
+        cameraDirection = glm::vec3(0, 0, -1);
         cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraDirection));
         cameraUp = glm::cross(cameraDirection, cameraRight);
 
@@ -201,6 +201,7 @@ struct App
     GLuint programUniformTexture;
     GLuint programUniformModelMatrix;
     GLuint programUniformCameraMatrix;
+    GLuint programUniformProjectionMatrix;
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;

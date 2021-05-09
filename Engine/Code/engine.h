@@ -126,14 +126,23 @@ struct Mesh
 
 struct Camera
 {
-    vec3 cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
+    vec3 cameraPos;
     vec3 cameraTarget = glm::vec3(0);
-    vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-    vec3 cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraDirection));
-    vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-    glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
+    vec3 cameraDirection;
+    vec3 cameraRight;
+    vec3 cameraUp;
+    glm::mat4 viewMatrix;
 
     float speed = 10;
+
+    Camera()
+    {
+        cameraPos = glm::vec3(0.0f, 0.0f, -3.0f);
+        cameraDirection = glm::normalize(cameraPos - cameraTarget);
+        cameraRight = glm::normalize(glm::cross(glm::vec3(0, 1, 0), cameraDirection));
+        cameraUp = glm::cross(cameraDirection, cameraRight);
+        viewMatrix = glm::lookAt(cameraPos, cameraPos + cameraDirection, cameraUp);
+    }
 
     void RecalcalculateViewMatrix()
     {

@@ -405,7 +405,7 @@ void Render(App* app)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
 
-    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
+    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
     glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
     glClearColor(0.1F, 0.1F, 0.1F, 1.0F);

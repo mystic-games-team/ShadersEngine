@@ -29,6 +29,9 @@ uniform sampler2D uTexture;
 layout(location = 0) out vec4 oColor;
 
 void main() {
+    // float d = 1 - gl_FragCoord.z;
+    // oColor = vec4(d, d, d,1.0F);
+
     oColor = texture(uTexture, vTexCoord);
 }
 

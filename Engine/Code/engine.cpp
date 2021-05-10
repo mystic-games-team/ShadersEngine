@@ -331,9 +331,12 @@ void Gui(App* app)
     ImGui::Text("OpenGL Renderer: %s", glGetString(GL_RENDERER));
     ImGui::Text("OpenGL Vendor: %s", glGetString(GL_VENDOR));
     ImGui::Text("OpenGL GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    ImGui::Text("--- Camera Pos ---");
     ImGui::Text("Camera Pos X: %f", app->mainCam->cameraPos.x);
     ImGui::Text("Camera Pos Y: %f", app->mainCam->cameraPos.y);
     ImGui::Text("Camera Pos Z: %f", app->mainCam->cameraPos.z);
+    ImGui::Text("------------------");
+    ImGui::Combo("Painted Texture", (int*)&app->currentTextureType, "Albedo Color\0Depth Buffer\0Normals Buffer");
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 2.5F));
     ImGui::AlignTextToFramePadding();
     ImGui::PopStyleVar();

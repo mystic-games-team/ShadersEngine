@@ -14,6 +14,13 @@ typedef glm::ivec2 ivec2;
 typedef glm::ivec3 ivec3;
 typedef glm::ivec4 ivec4;
 
+enum TextureTypes
+{
+    AlbedoColor,
+    DepthBuffer,
+    NormalsBuffer
+};
+
 struct Image
 {
     void* pixels;
@@ -175,6 +182,7 @@ struct App
     Input input;
 
     // Graphics
+    TextureTypes currentTextureType = TextureTypes::AlbedoColor;
     char gpuName[64];
     char openGlVersion[64];
 

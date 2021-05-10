@@ -348,7 +348,18 @@ void Gui(App* app)
         }
         ImGui::TreePop();
     }
-    ImGui::Image((ImTextureID)app->colorAttachment, ImVec2(app->displaySize.x, app->displaySize.y), ImVec2(0, 1), ImVec2(1, 0));
+
+    switch (app->currentTextureType) {
+    case TextureTypes::AlbedoColor: {
+
+        break; }
+    case TextureTypes::DepthBuffer: {
+        ImGui::Image((ImTextureID)app->depthAttachment, ImVec2(app->displaySize.x, app->displaySize.y), ImVec2(0, 1), ImVec2(1, 0));
+        break; }
+    case TextureTypes::NormalsBuffer: {
+
+        break; }
+    }
 
     ImGui::End();
 }

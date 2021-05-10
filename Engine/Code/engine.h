@@ -182,7 +182,7 @@ struct App
     Input input;
 
     // Graphics
-    TextureTypes currentTextureType = TextureTypes::AlbedoColor;
+    TextureTypes currentTextureType = TextureTypes::DepthBuffer;
     char gpuName[64];
     char openGlVersion[64];
 

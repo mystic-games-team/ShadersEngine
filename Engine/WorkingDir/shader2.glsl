@@ -32,10 +32,13 @@ uniform sampler2D uTexture;
 
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormals;
+layout(location = 2) out vec4 oAlbedo;
 
 void main() {
 
     oNormals = vec4(normalize(normals), 1.0F);
+    oAlbedo = texture(uTexture, vTexCoord);
+
     oColor = texture(uTexture, vTexCoord);
 }
 

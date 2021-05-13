@@ -233,6 +233,7 @@ struct App
     GLuint colorAttachment;
     GLuint depthAttachment;
     GLuint normalsAttachment;
+    GLuint albedoAttachment;
 };
 
 

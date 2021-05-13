@@ -183,6 +183,9 @@ void Init(App* app)
 {
     app->mode = Mode::Mode_Mesh;
 
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
+    glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
+
     switch (app->mode) {
     case Mode_TexturedQuad: {
         const VertexV3V2 vertices[] =
@@ -230,16 +233,10 @@ void Init(App* app)
         app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
         break; }
     case Mode_Mesh: {
-
-        //VertexBufferLayout vertexBufferLayout = {};
-        //vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 0,3,0 });
-        //vertexBufferLayout.attributes.push_back(VertexBufferAttribute{ 2,2,3 * sizeof(float) });
-
-        //Submesh submesh = {};
-        //submesh.vertexBufferLayout = vertexBufferLayout;
-        //submesh.vertices.swap(vertices);
-        //submesh.indices.swap(indices);
-        //myMesh->submeshes.push_back(submesh);
+        glGenBuffers(1, &app->cameraUniformBlock);
+        glBindBuffer(GL_UNIFORM_BUFFER, app->cameraUniformBlock);
+        glBufferData(GL_UNIFORM_BUFFER, app->maxUniformBufferSize, NULL, GL_STREAM_DRAW);
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -247,8 +244,6 @@ void Init(App* app)
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
         app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
-        app->programUniformProjectionMatrix = glGetUniformLocation(texturedMeshProgram.handle, "projectionMatrix");
-        app->programUniformCameraMatrix = glGetUniformLocation(texturedMeshProgram.handle, "cameraMatrix");
         app->programUniformModelMatrix = glGetUniformLocation(texturedMeshProgram.handle, "modelMatrix");
 
         app->patrick = LoadModel(app, "Patrick/Patrick.obj");
@@ -459,8 +454,22 @@ void Render(App* app)
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(textureMeshProgram.handle);
 
-            glUniformMatrix4fv(app->programUniformProjectionMatrix, 1, GL_FALSE, glm::value_ptr(glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f)));
-            glUniformMatrix4fv(app->programUniformCameraMatrix, 1, GL_FALSE, glm::value_ptr(app->mainCam->viewMatrix));
+            glBindBuffer(GL_UNIFORM_BUFFER, app->cameraUniformBlock);
+            u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
+            u32 bufferHead = 0;
+
+            memcpy(bufferData + bufferHead, glm::value_ptr(app->mainCam->viewMatrix), sizeof(glm::mat4));
+            bufferHead += sizeof(glm::mat4);
+
+            memcpy(bufferData + bufferHead, glm::value_ptr(glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f)), sizeof(glm::mat4));
+            bufferHead += sizeof(glm::mat4);
+
+            glUnmapBuffer(GL_UNIFORM_BUFFER);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            u32 blockOffset = 0;
+            u32 blockSize = sizeof(glm::mat4) * 2.0F;
+            glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->cameraUniformBlock, blockOffset, blockSize);
 
             for (auto item = app->entities.begin(); item != app->entities.end(); ++item) {
 

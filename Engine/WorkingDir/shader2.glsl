@@ -12,9 +12,13 @@ layout(location=2) in vec2 aTexCoord;
 out vec2 vTexCoord;
 out vec3 normals;
 
-uniform mat4 cameraMatrix;
+layout(binding = 1, std140) uniform GlobalParams
+{
+    uniform mat4 cameraMatrix;
+    uniform mat4 projectionMatrix;
+};
+
 uniform mat4 modelMatrix;
-uniform mat4 projectionMatrix;
 
 void main() {
     vTexCoord = aTexCoord;

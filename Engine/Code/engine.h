@@ -219,8 +219,6 @@ struct App
     // Location of the texture uniform in the textured quad shader
     GLuint programUniformTexture;
     GLuint programUniformModelMatrix;
-    GLuint programUniformCameraMatrix;
-    GLuint programUniformProjectionMatrix;
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
@@ -234,8 +232,12 @@ struct App
     GLuint depthAttachment;
     GLuint normalsAttachment;
     GLuint albedoAttachment;
-};
 
+    GLint maxUniformBufferSize;
+    GLint uniformBlockAlignment;
+
+    GLuint cameraUniformBlock;
+};
 
 void Init(App* app);
 

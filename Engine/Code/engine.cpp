@@ -244,6 +244,7 @@ void Init(App* app)
         app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
         app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
         app->programUniformProjectionMatrix = glGetUniformLocation(texturedMeshProgram.handle, "projectionMatrix");
@@ -281,10 +282,21 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenTextures(1, &app->normalsAttachment);
+    glBindTexture(GL_TEXTURE_2D, app->normalsAttachment);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glGenFramebuffers(1, &app->frameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachment, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachment, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->normalsAttachment, 0);
 
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
@@ -357,7 +369,7 @@ void Gui(App* app)
         ImGui::Image((ImTextureID)app->depthAttachment, ImVec2(app->displaySize.x, app->displaySize.y), ImVec2(0, 1), ImVec2(1, 0));
         break; }
     case TextureTypes::NormalsBuffer: {
-
+        ImGui::Image((ImTextureID)app->normalsAttachment, ImVec2(app->displaySize.x, app->displaySize.y), ImVec2(0, 1), ImVec2(1, 0));
         break; }
     }
 
@@ -405,7 +417,7 @@ void Render(App* app)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
 
-    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_DEPTH_ATTACHMENT };
+    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
     glClearColor(0.1F, 0.1F, 0.1F, 1.0F);

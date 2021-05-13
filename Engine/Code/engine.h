@@ -232,6 +232,7 @@ struct App
     GLuint frameBuffer;
     GLuint colorAttachment;
     GLuint depthAttachment;
+    GLuint normalsAttachment;
 };
 
 

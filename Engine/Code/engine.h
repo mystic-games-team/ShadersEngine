@@ -76,8 +76,8 @@ struct Program
 
 enum Mode
 {
-    Mode_TexturedQuad,
-    Mode_Mesh,
+    Mode_Forward,
+    Mode_Deferred,
     Mode_Count
 };
 
@@ -232,27 +232,14 @@ struct App
     u32 texturedGeometryProgramIdx;
     u32 texturedMeshProgramIdx;
 
-    // texture indices
-    u32 diceTexIdx;
-    u32 whiteTexIdx;
-    u32 blackTexIdx;
-    u32 normalTexIdx;
-    u32 magentaTexIdx;
-
     // Model
     u32 patrick;
 
     // Mode
     Mode mode;
 
-    // Embedded geometry (in-editor simple meshes such as
-    // a screen filling quad, a cube, a sphere...)
-    GLuint embeddedVertices;
-    GLuint embeddedElements;
-
     // Location of the texture uniform in the textured quad shader
     GLuint programUniformTexture;
-    GLuint programUniformModelMatrix;
 
     // VAO object to link our screen filling quad with our textured quad shader
     GLuint vao;
@@ -270,8 +257,6 @@ struct App
 
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;
-
-    GLuint cameraUniformBlock;
 
     Buffer cbuffer;
     u32 globalParamsOffset;

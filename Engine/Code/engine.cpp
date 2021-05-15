@@ -182,81 +182,25 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-    app->mode = Mode::Mode_Mesh;
-
+    app->mode = Mode::Mode_Forward;
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 
     app->cbuffer = CreateBuffer(app->maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STREAM_DRAW);
 
-    switch (app->mode) {
-    case Mode_TexturedQuad: {
-        const VertexV3V2 vertices[] =
-        {
-            { glm::vec3(-0.5, -0.5, 0.0), glm::vec2(0.0, 0.0) },
-            { glm::vec3(0.5, -0.5, 0.0), glm::vec2(1.0, 0.0) },
-            { glm::vec3(0.5, 0.5, 0.0), glm::vec2(1.0, 1.0) },
-            { glm::vec3(-0.5, 0.5, 0.0), glm::vec2(0.0, 1.0) },
-        };
+    app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
+    Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+    texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+    texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
+    texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+    app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
 
-        const u16 indices[] =
-        {
-            0, 1, 2,
-            0, 2, 3,
-        };
+    app->patrick = LoadModel(app, "Patrick/Patrick.obj");
 
-        glGenBuffers(1, &app->embeddedVertices);
-        glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        glGenBuffers(1, &app->embeddedElements);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        glGenVertexArrays(1, &app->vao);
-        glBindVertexArray(app->vao);
-        glBindBuffer(GL_ARRAY_BUFFER, app->embeddedVertices);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)0);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(VertexV3V2), (void*)12);
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, app->embeddedElements);
-        glBindVertexArray(0);
-
-        app->texturedGeometryProgramIdx = LoadProgram(app, "shaders.glsl", "TEXTURED_GEOMETRY");
-        Program& texturedGeometryProgram = app->programs[app->texturedGeometryProgramIdx];
-        app->programUniformTexture = glGetUniformLocation(texturedGeometryProgram.handle, "uTexture");
-
-        app->diceTexIdx = LoadTexture2D(app, "dice.png");
-        app->whiteTexIdx = LoadTexture2D(app, "color_white.png");
-        app->blackTexIdx = LoadTexture2D(app, "color_black.png");
-        app->normalTexIdx = LoadTexture2D(app, "color_normal.png");
-        app->magentaTexIdx = LoadTexture2D(app, "color_magenta.png");
-        break; }
-    case Mode_Mesh: {
-        glGenBuffers(1, &app->cameraUniformBlock);
-        glBindBuffer(GL_UNIFORM_BUFFER, app->cameraUniformBlock);
-        glBufferData(GL_UNIFORM_BUFFER, app->maxUniformBufferSize, NULL, GL_STREAM_DRAW);
-        glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
-        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
-        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
-        app->programUniformModelMatrix = glGetUniformLocation(texturedMeshProgram.handle, "modelMatrix");
-
-        app->patrick = LoadModel(app, "Patrick/Patrick.obj");
-
-        app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
-        app->entities.emplace_back(vec3(-2.5F, 0.0F, 0), vec3(1, 1, 1), app->patrick);
-        app->entities.emplace_back(vec3(2.5F, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
-        break; }
-    }
+    app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
+    app->entities.emplace_back(vec3(-2.5F, 0.0F, 0), vec3(1, 1, 1), app->patrick);
+    app->entities.emplace_back(vec3(2.5F, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
 
     app->mainCam = new Camera();
 
@@ -456,22 +400,7 @@ void Render(App* app)
 
     switch (app->mode)
     {
-        case Mode_TexturedQuad: {
-            Program& programTexturedGeometry = app->programs[app->texturedGeometryProgramIdx];
-            glUseProgram(programTexturedGeometry.handle);
-            glBindVertexArray(app->vao);
-
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-            glUniform1i(app->programUniformTexture, 0);
-            glActiveTexture(GL_TEXTURE0);
-            GLuint textureHandle = app->textures[app->diceTexIdx].handle;
-            glBindTexture(GL_TEXTURE_2D, textureHandle);
-
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, 0);
-            break; }
-        case Mode_Mesh: {
+        case Mode_Forward: {
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(textureMeshProgram.handle);
 
@@ -537,6 +466,9 @@ void Render(App* app)
             }
 
             UnmapBuffer(app->cbuffer);
+
+            break; }
+        case Mode::Mode_Deferred: {
 
             break; }
         default:;

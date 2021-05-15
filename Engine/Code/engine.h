@@ -233,6 +233,7 @@ struct App
 
     // Model
     u32 patrick;
+    u32 cube;
 
     // Mode
     Mode mode;

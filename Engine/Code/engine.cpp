@@ -182,7 +182,7 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-    app->mode = Mode::Mode_Deferred;
+    app->mode = Mode::Mode_Forward;
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
@@ -209,10 +209,12 @@ void Init(App* app)
     }
 
     app->patrick = LoadModel(app, "Patrick/Patrick.obj");
+    app->cube = LoadModel(app, "Patrick/cube.obj");
 
     app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
     app->entities.emplace_back(vec3(-2.5F, 0.0F, 0), vec3(1, 1, 1), app->patrick);
     app->entities.emplace_back(vec3(2.5F, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
+    app->entities.emplace_back(vec3(0, -3.0f, 0.0F), vec3(5, 0.2f, 5), app->cube);
 
     app->mainCam = new Camera();
 

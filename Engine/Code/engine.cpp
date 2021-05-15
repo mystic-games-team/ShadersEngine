@@ -514,6 +514,11 @@ void Render(App* app)
 
             UnmapBuffer(app->cbuffer);
 
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+
             break; }
         case Mode::Mode_Deferred: {
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
@@ -617,11 +622,6 @@ void Render(App* app)
     }
     glBindVertexArray(0);
     glUseProgram(0);
-
-    //glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
-    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    //glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-    //glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)

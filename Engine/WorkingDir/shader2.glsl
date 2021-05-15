@@ -37,23 +37,56 @@ void main() {
 
 #elif defined(FRAGMENT) ///////////////////////////////////////////////
 
+struct Light
+{
+    unsigned int    type;
+    vec3            color;
+    vec3            direction;
+    vec3            position;
+    float           intensity;
+}
+
 in vec2 vTexCoord;
 in vec3 vNormal;
 in vec4 vPosition;
+in vec3 vViewDir;
 
 uniform sampler2D uTexture;
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+    vec3            uCameraPosition;
+    unsigned int    uLightCount;
+    Light           uLight[16];
+}
 
 layout(location = 0) out vec4 oColor;
 layout(location = 1) out vec4 oNormals;
 layout(location = 2) out vec4 oAlbedo;
-layout(location = 3) out vec4 oPositions;
+layout(location = 3) out vec4 oLight;
+layout(location = 4) out vec4 oPositions;
 
-void main() {
+void main()
+{
+    vec3 finalColor = vec3(0.0);
+    for(int i = 0; i < uLightCount; ++i)
+    {
+        switch (uLight[i].type)
+        {
+            case 0:
+            break;
+            case 1: 
+            break;
+        }
+    }
 
-    oNormals = vec4(normalize(vNormal), 1.0F);
-    oAlbedo = texture(uTexture, vTexCoord);
-    oPositions = vPosition;
-    oColor = texture(uTexture, vTexCoord);
+    oColor = vec4(finalColor, 1.0) + texture(uTexture, vTexCoord) * 0.2;
+    oNormals = vec4(vNormal, 1.0);
+    oAlbedo = texture(uTexture, vTextCoord);
+    oLight = vec4(result, 1.0);
+    oPosition = vec4(vPos, 1.0);
+
+    gl_FragDepth = gl_FragCoord.z - 0.1;
 }
 
 #endif

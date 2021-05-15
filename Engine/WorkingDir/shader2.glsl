@@ -85,6 +85,12 @@ void main()
     vec3 finalColor = vec3(0.0);
     for(int i = 0; i < uLightCount; ++i)
     {
+        if (uLight[i].type == 0) { // Directional
+            finalColor += vec3(0);
+        }
+        else if (uLight[i].type == 1) { // Point
+            finalColor += vec3(0);
+        }
     }
 
     oColor = vec4(finalColor, 1.0) + texture(uTexture, vTexCoord) * 0.2;

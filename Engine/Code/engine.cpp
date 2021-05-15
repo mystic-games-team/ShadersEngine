@@ -353,6 +353,8 @@ void Init(App* app)
 
     glDrawBuffers(1, &app->colorAttachment);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    app->lights.push_back(Light(LightType::Point, vec3(1.0F, 1.0F, 1.0F), vec3(-1, 0, 0), vec3(20, 0, 0), 5));
 }
 
 void Gui(App* app)
@@ -488,6 +490,7 @@ void Render(App* app)
                 PushVec3(app->cbuffer, light.color);
                 PushVec3(app->cbuffer, light.direction);
                 PushVec3(app->cbuffer, light.position);
+                PushFloat(app->cbuffer, light.intensity);
             }
 
             app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;

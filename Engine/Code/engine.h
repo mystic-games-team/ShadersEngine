@@ -196,6 +196,9 @@ struct Light
     vec3        color;
     vec3        direction;
     vec3        position;
+    float intensity;
+
+    Light(LightType type, vec3 color, vec3 direction, vec3 position, float intensity) : type(type), color(color), direction(direction), position(position), intensity(intensity) {}
 };
 
 struct App

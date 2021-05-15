@@ -283,16 +283,16 @@ void main() {
 	vec3 color = texture(uAlbedoTexture, vTexCoord).rgb;
 	float depth = texture(uDepthTexture, vTexCoord).r;
 
-	vec3 viewDir = normalize(uCameraPos - position);
+	vec3  vViewDir = uCameraPos - position;
 	vec3 finalColor = vec3(0.0,0.0,0.0);
 	
 	for(int i = 0; i < uLightCount; ++i) {			
 		if (depth < 1.0) {
 			if (uLight[i].type == 0) {
-				finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(viewDir));
+				finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
 			}
 			else if (uLight[i].intensity > length(uLight[i].position - position)) {
-					finalColor += CalculatePointLight(uLight[i], normals, position, viewDir);
+					finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
 			}
 		}
 		else {

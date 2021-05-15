@@ -17,6 +17,8 @@ struct Light
     vec3            direction;
     vec3            position;
     float           intensity;
+    float           linear;
+    float           quadratic;
 };
 
 
@@ -58,6 +60,8 @@ struct Light
     vec3            direction;
     vec3            position;
     float           intensity;
+    float           linear;
+    float           quadratic;
 };
 
 in vec2 vTexCoord;
@@ -80,16 +84,34 @@ layout(location = 2) out vec4 oAlbedo;
 layout(location = 3) out vec4 oPosition;
 layout(location = 4) out vec4 oLight;
 
+vec3 CalculateDirectionalLight(Light light, vec3 vNormal, vec3 vViewDir) 
+{
+    vec3 lightDirection = normalize(-light.direction);
+    vec3 diffuse = light.color *  max(dot(lightDirection, vNormal), 0.0);
+    return (diffuse + diffuse * pow(max(dot(vNormal, normalize(lightDirection + vViewDir)), 0.0), 0.0) * 0.01) * light.intensity;
+}
+
+vec3 CalculatePointLight(Light light, vec3 vNormal, vec3 vPosition, vec3 vViewDir) 
+{
+    vec3 lightDirection = normalize(light.position - vPosition);
+    float distance = length(light.position - vPosition);
+    float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * distance * distance);      
+	return (light.color * max(dot(vNormal, lightDirection), 0.0) + light.color * pow(max(dot(vNormal, normalize(lightDirection + vViewDir)), 0.0), 14.0)) * light.intensity * attenuation;
+}
+
 void main()
 {
     vec3 finalColor = vec3(0.0);
-    for(int i = 0; i < uLightCount; ++i)
+    for (int i = 0; i < uLightCount; ++i)
     {
-        if (uLight[i].type == 0) { // Directional
-            finalColor += vec3(0);
-        }
-        else if (uLight[i].type == 1) { // Point
-            finalColor += vec3(0);
+        switch (uLight[i].type)
+        {
+            case 0:
+                finalColor += CalculateDirectionalLight(uLight[i], vNormal, normalize(vViewDir));
+            break;
+            case 1:
+                finalColor += CalculatePointLight(uLight[i], vNormal, vPosition.xyz, normalize(vViewDir));
+            break;
         }
     }
 

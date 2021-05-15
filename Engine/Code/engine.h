@@ -152,7 +152,7 @@ struct Camera
     vec3 cameraUp;
     glm::mat4 viewMatrix;
 
-    float speed = 2;
+    float speed = 5;
     float yaw = -90.0f;
     float pitch = 0;
 
@@ -216,7 +216,7 @@ struct App
     Input input;
 
     // Graphics
-    TextureTypes currentTextureType = TextureTypes::DepthBuffer;
+    TextureTypes currentTextureType = TextureTypes::AlbedoColor;
     char gpuName[64];
     char openGlVersion[64];
 

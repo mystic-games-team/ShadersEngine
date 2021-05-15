@@ -354,7 +354,9 @@ void Init(App* app)
     glDrawBuffers(1, &app->colorAttachment);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    app->lights.push_back(Light(LightType::Point, vec3(1.0F, 1.0F, 1.0F), vec3(-1, 0, 0), vec3(20, 0, 0), 5));
+    app->lights.push_back(Light(LightType::Point, vec3(1.0F, 0.3F, 0.3F), vec3(-1, 0, 0), vec3(0, 0, 3), 5));
+    app->lights.push_back(Light(LightType::Point, vec3(0, 1, 0), vec3(-1, 0, 0), vec3(-4, 0, 1), 1));
+    app->lights.push_back(Light(LightType::Directional, vec3(0, 0, 1.0F), vec3(-1, 0, 1), vec3(3, 0, 3), 1));
 }
 
 void Gui(App* app)
@@ -426,8 +428,8 @@ void Update(App* app)
 
     if (app->input.mouseButtons[MouseButton::LEFT] == BUTTON_PRESSED)
     {
-        app->mainCam->yaw += app->input.mouseDelta.x * app->deltaTime * 10;
-        app->mainCam->pitch -= app->input.mouseDelta.y * app->deltaTime * 10;
+        app->mainCam->yaw += app->input.mouseDelta.x * app->deltaTime * 30;
+        app->mainCam->pitch -= app->input.mouseDelta.y * app->deltaTime * 30;
 
         if (app->mainCam->pitch > 89.0f)
             app->mainCam->pitch = 89.0f;
@@ -491,6 +493,8 @@ void Render(App* app)
                 PushVec3(app->cbuffer, light.direction);
                 PushVec3(app->cbuffer, light.position);
                 PushFloat(app->cbuffer, light.intensity);
+                PushFloat(app->cbuffer, 0.82f);
+                PushFloat(app->cbuffer, 1.63f);
             }
 
             app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;

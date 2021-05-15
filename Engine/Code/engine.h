@@ -42,6 +42,14 @@ struct VertexShaderAttribute
     u8 componentCount;
 };
 
+struct Buffer {
+    GLuint  handle;
+    GLenum  type;
+    u32     size;
+    u32     head;
+    void* data;
+};
+
 struct VertexShaderLayout
 {
     std::vector<VertexShaderAttribute> attributes;

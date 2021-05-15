@@ -10,6 +10,7 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 #include "assimp_model_loading.h"
+#include "buffer_manager.h"
 
 GLuint CreateProgramFromSource(String programSource, const char* shaderName)
 {

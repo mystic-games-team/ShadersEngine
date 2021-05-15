@@ -45,7 +45,7 @@ void main()
     gl_Position = uWorldViewProjectionMatrix * uWorldMatrix * vec4(aPosition, 1.0);
 
     vPosition = uWorldMatrix * vec4(aPosition, 1.0);
-    vNormal = mat3(transpose(inverse(uWorldMatrix))) * aNormals;
+    vNormal = normalize(mat3(transpose(inverse(uWorldMatrix))) * aNormals);
     vTexCoord = aTexCoord;
     
     vViewDir = uCameraPosition - vPosition.xyz;
@@ -283,25 +283,25 @@ void main() {
 	float depth = texture(uDepthTexture, vTexCoord).r;
 
 	vec3  vViewDir = uCameraPosition - position;
-	vec3 finalColor = vec3(0.0,0.0,0.0);
-	
-	for(int i = 0; i < uLightCount; ++i) {			
-		if (depth < 1.0) {
-			if (uLight[i].type == 0) {
-				finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
-			}
-			else {
-				finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
-			}
-		}
-		else {
-			finalColor = vec3(0.1);
-		}
-	}
 
-	oColor = vec4(finalColor + color * 0.2, 1.0);
+    vec3 finalColor = vec3(0.0);
+    for (int i = 0; i < uLightCount; ++i)
+    {
+        switch (uLight[i].type)
+        {
+            case 0:
+                finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
+            break;
+            case 1:
+                finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
+            break;
+        }
+    }
+
+    oColor = vec4(finalColor, 1.0) + vec4(color, 1) * 0.2;
+
+    gl_FragDepth = gl_FragCoord.z - 0.1;
 }
-
 
 #endif
 #endif

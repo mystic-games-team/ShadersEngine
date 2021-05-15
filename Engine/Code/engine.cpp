@@ -472,6 +472,26 @@ void Render(App* app)
             u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
             u32 bufferHead = 0;
 
+            // Global Params
+            app->globalParamsOffset = app->cbuffer.head;
+
+            PushVec3(app->cbuffer, app->mainCam->cameraPos);
+            PushUInt(app->cbuffer, app->lights.size());
+
+            for (u32 i = 0; i < app->lights.size(); ++i)
+            {
+                AlignHead(app->cbuffer, sizeof(vec4));
+
+                Light& light = app->lights[i];
+                PushUInt(app->cbuffer, light.type);
+                PushVec3(app->cbuffer, light.color);
+                PushVec3(app->cbuffer, light.direction);
+                PushVec3(app->cbuffer, light.position);
+            }
+
+            app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;
+
+            // Local Params
             memcpy(bufferData + bufferHead, glm::value_ptr(app->mainCam->viewMatrix), sizeof(glm::mat4));
             bufferHead += sizeof(glm::mat4);
 

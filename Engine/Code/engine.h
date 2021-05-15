@@ -181,6 +181,20 @@ struct Camera
     }
 };
 
+enum LightType
+{
+    Directional,
+    Point
+};
+
+struct Light
+{
+    LightType   type;
+    vec3        color;
+    vec3        direction;
+    vec3        position;
+};
+
 struct App
 {
     // Loop
@@ -242,11 +256,18 @@ struct App
     GLuint normalsAttachment;
     GLuint albedoAttachment;
     GLuint positionsAttachment;
+    GLuint positionsAttachment;
 
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;
 
     GLuint cameraUniformBlock;
+
+    Buffer cbuffer;
+    u32 globalParamsOffset;
+    u32 globalParamsSize;
+
+    std::vector<Light> lights;
 };
 
 void Init(App* app);

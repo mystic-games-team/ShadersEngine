@@ -259,7 +259,6 @@ struct App
     GLuint normalsAttachment;
     GLuint albedoAttachment;
     GLuint positionsAttachment;
-    GLuint positionsAttachment;
 
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;

@@ -5,6 +5,15 @@
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
+struct Light
+{
+    unsigned int    type;
+    vec3            color;
+    vec3            direction;
+    vec3            position;
+    float           intensity;
+}
+
 layout(location=0) in vec3 aPosition;
 layout(location=1) in vec3 aNormals;
 layout(location=2) in vec2 aTexCoord;
@@ -71,13 +80,6 @@ void main()
     vec3 finalColor = vec3(0.0);
     for(int i = 0; i < uLightCount; ++i)
     {
-        switch (uLight[i].type)
-        {
-            case 0:
-            break;
-            case 1: 
-            break;
-        }
     }
 
     oColor = vec4(finalColor, 1.0) + texture(uTexture, vTexCoord) * 0.2;

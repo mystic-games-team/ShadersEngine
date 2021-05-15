@@ -182,19 +182,31 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-    app->mode = Mode::Mode_Forward;
+    app->mode = Mode::Mode_Deferred;
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 
     app->cbuffer = CreateBuffer(app->maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STREAM_DRAW);
 
-    app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
-    Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-    texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
-    texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
-    texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
-    app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+    switch (app->mode) {
+    case Mode::Mode_Forward: {
+        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
+        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+        break; }
+    case Mode::Mode_Deferred: {
+        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "DEF");
+        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+        break; }
+    }
 
     app->patrick = LoadModel(app, "Patrick/Patrick.obj");
 
@@ -469,7 +481,55 @@ void Render(App* app)
 
             break; }
         case Mode::Mode_Deferred: {
+            Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
+            glUseProgram(textureMeshProgram.handle);
 
+            MapBuffer(app->cbuffer, GL_WRITE_ONLY);
+
+            app->globalParamsOffset = app->cbuffer.head;
+
+            app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
+
+            for (auto item = app->entities.begin(); item != app->entities.end(); ++item) {
+                AlignHead(app->cbuffer, app->uniformBlockAlignment);
+
+                Entity& entity = *item;
+                glm::mat4 world = entity.mat;
+                glm::mat4 worldViewProjection = glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f) * app->mainCam->viewMatrix * world;
+
+
+                entity.localParamsOffset = app->cbuffer.head;
+                PushMat4(app->cbuffer, world);
+                PushMat4(app->cbuffer, worldViewProjection);
+                entity.localParamsSize = app->cbuffer.head - entity.localParamsOffset;
+
+                glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->cbuffer.handle, entity.localParamsOffset, entity.localParamsSize);
+
+                Model& model = app->models[entity.model];
+                Mesh& mesh = app->meshes[model.meshIdx];
+
+                for (u32 i = 0; i < mesh.submeshes.size(); ++i)
+                {
+                    GLuint vao = FindVAO(mesh, i, textureMeshProgram);
+                    glBindVertexArray(vao);
+
+                    u32 submeshMaterialIdx = model.materialIdx[i];
+                    Material& submeshMaterial = app->materials[submeshMaterialIdx];
+
+                    glActiveTexture(GL_TEXTURE0);
+                    glBindTexture(GL_TEXTURE_2D, app->textures[submeshMaterial.albedoTextureIdx].handle);
+                    glUniform1i(app->programUniformTexture, 0);
+
+                    Submesh& submesh = mesh.submeshes[i];
+                    glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
+                }
+            }
+
+            // TODO: aqui fer bind del shader, passar les textures i pintar llums
+
+            UnmapBuffer(app->cbuffer);
             break; }
         default:;
     }

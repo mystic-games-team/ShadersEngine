@@ -229,7 +229,6 @@ struct App
     std::vector<Model>    models;
 
     // program indices
-    u32 texturedGeometryProgramIdx;
     u32 texturedMeshProgramIdx;
 
     // Model

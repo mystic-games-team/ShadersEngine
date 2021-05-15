@@ -200,6 +200,11 @@ struct Light
 
 struct App
 {
+    ~App()
+    {
+        delete mainCam;
+    }
+
     // Loop
     f32  deltaTime;
     bool isRunning;

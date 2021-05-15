@@ -252,9 +252,9 @@ void Init(App* app)
 
         app->patrick = LoadModel(app, "Patrick/Patrick.obj");
 
-        app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(0.2f, 0.2f, 0.2f), app->patrick);
-        app->entities.emplace_back(vec3(-1.5F, 0.0F, 0), vec3(0.2f, 0.2f, 0.2f), app->patrick);
-        app->entities.emplace_back(vec3(1.5F, 0.0F, 0.0F), vec3(0.2f, 0.2f, 0.2f), app->patrick);
+        app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
+        app->entities.emplace_back(vec3(-2.5F, 0.0F, 0), vec3(1, 1, 1), app->patrick);
+        app->entities.emplace_back(vec3(2.5F, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
         break; }
     }
 

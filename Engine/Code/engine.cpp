@@ -184,8 +184,11 @@ void Init(App* app)
 {
     app->mode = Mode::Mode_Mesh;
 
+
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
+
+    app->cbuffer = CreateBuffer(app->maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STREAM_DRAW);
 
     switch (app->mode) {
     case Mode_TexturedQuad: {
@@ -468,14 +471,12 @@ void Render(App* app)
             Program& textureMeshProgram = app->programs[app->texturedMeshProgramIdx];
             glUseProgram(textureMeshProgram.handle);
 
-            glBindBuffer(GL_UNIFORM_BUFFER, app->cameraUniformBlock);
-            u8* bufferData = (u8*)glMapBuffer(GL_UNIFORM_BUFFER, GL_WRITE_ONLY);
-            u32 bufferHead = 0;
+            MapBuffer(app->cbuffer, GL_WRITE_ONLY);
 
-            // Global Params
             app->globalParamsOffset = app->cbuffer.head;
-
+            
             PushVec3(app->cbuffer, app->mainCam->cameraPos);
+
             PushUInt(app->cbuffer, app->lights.size());
 
             for (u32 i = 0; i < app->lights.size(); ++i)
@@ -491,26 +492,25 @@ void Render(App* app)
 
             app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;
 
-            // Local Params
-            memcpy(bufferData + bufferHead, glm::value_ptr(app->mainCam->viewMatrix), sizeof(glm::mat4));
-            bufferHead += sizeof(glm::mat4);
-
-            memcpy(bufferData + bufferHead, glm::value_ptr(glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f)), sizeof(glm::mat4));
-            bufferHead += sizeof(glm::mat4);
-
-            glUnmapBuffer(GL_UNIFORM_BUFFER);
-            glBindBuffer(GL_UNIFORM_BUFFER, 0);
-
-            u32 blockOffset = 0;
-            u32 blockSize = sizeof(glm::mat4) * 2.0F;
-            glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->cameraUniformBlock, blockOffset, blockSize);
+            glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             for (auto item = app->entities.begin(); item != app->entities.end(); ++item) {
+                AlignHead(app->cbuffer, app->uniformBlockAlignment);
 
-                Model& model = app->models[(*item).model];
+                Entity& entity = *item;
+                glm::mat4 world = entity.mat;
+                glm::mat4 worldViewProjection = glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f) * app->mainCam->viewMatrix * world;
+
+
+                entity.localParamsOffset = app->cbuffer.head;
+                PushMat4(app->cbuffer, world);
+                PushMat4(app->cbuffer, worldViewProjection);
+                entity.localParamsSize = app->cbuffer.head - entity.localParamsOffset;
+
+                glBindBufferRange(GL_UNIFORM_BUFFER, 1, app->cbuffer.handle, entity.localParamsOffset, entity.localParamsSize);
+
+                Model& model = app->models[entity.model];
                 Mesh& mesh = app->meshes[model.meshIdx];
-
-                glUniformMatrix4fv(app->programUniformModelMatrix, 1, GL_FALSE, glm::value_ptr((*item).mat));
 
                 for (u32 i = 0; i < mesh.submeshes.size(); ++i)
                 {
@@ -528,6 +528,9 @@ void Render(App* app)
                     glDrawElements(GL_TRIANGLES, submesh.indices.size(), GL_UNSIGNED_INT, (void*)(u64)submesh.indexOffset);
                 }
             }
+
+            UnmapBuffer(app->cbuffer);
+
             break; }
         default:;
     }

@@ -199,12 +199,17 @@ void Init(App* app)
         app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
         break; }
     case Mode::Mode_Deferred: {
-        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "DEF");
+        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "DEF_GEOMETRY");
         Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
         texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
         app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+
+        app->lightProgramIdx = LoadProgram(app, "shader2.glsl", "LIGHTNING");
+        Program& light = app->programs[app->lightProgramIdx];
+        light.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        light.vertexInputLayout.attributes.push_back({ 1, 2 }); // texCoord
         break; }
     }
 
@@ -396,6 +401,36 @@ void Update(App* app)
     app->mainCam->RecalcalculateViewMatrix();
 }
 
+void renderQuad()
+{
+    static unsigned int quadVAO = 0;
+    static unsigned int quadVBO;
+
+    if (quadVAO == 0)
+    {
+        float quadVertices[] = {
+            // positions        // texture Coords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // setup plane VAO
+        glGenVertexArrays(1, &quadVAO);
+        glGenBuffers(1, &quadVBO);
+        glBindVertexArray(quadVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    }
+    glBindVertexArray(quadVAO);
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glBindVertexArray(0);
+}
+
 void Render(App* app)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
@@ -527,19 +562,66 @@ void Render(App* app)
                 }
             }
 
-            // TODO: aqui fer bind del shader, passar les textures i pintar llums
+            glBindFramebuffer(GL_FRAMEBUFFER, NULL);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            glUseProgram(app->programs[app->lightProgramIdx].handle);
+
+            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uPositionTexture"), 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, app->positionsAttachment);
+            
+            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uNormalsTexture"), 1);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, app->normalsAttachment);
+            
+            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uAlbedoTexture"), 2);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, app->albedoAttachment);
+            
+            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uDepthTexture"), 3);
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, app->depthAttachment);
+
+            AlignHead(app->cbuffer, app->uniformBlockAlignment);
+
+            app->globalParamsOffset = app->cbuffer.head;
+
+            PushVec3(app->cbuffer, app->mainCam->cameraPos);
+            PushUInt(app->cbuffer, app->lights.size());
+
+            for (u32 i = 0; i < app->lights.size(); ++i)
+            {
+                AlignHead(app->cbuffer, sizeof(vec4));
+
+                Light& light = app->lights[i];
+                PushUInt(app->cbuffer, light.type);
+                PushVec3(app->cbuffer, light.color);
+                PushVec3(app->cbuffer, light.direction);
+                PushVec3(app->cbuffer, light.position);
+                PushFloat(app->cbuffer, light.intensity);
+                PushFloat(app->cbuffer, 0.82f);
+                PushFloat(app->cbuffer, 1.63f);
+            }
+            app->globalParamsSize = app->cbuffer.head - app->globalParamsOffset;
+
+            glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             UnmapBuffer(app->cbuffer);
+
+            glActiveTexture(GL_TEXTURE0);
+
+            renderQuad();
             break; }
         default:;
     }
     glBindVertexArray(0);
     glUseProgram(0);
 
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT, GL_LINEAR);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    //glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
+    //glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    //glBlitFramebuffer(0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    //glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 }
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program)

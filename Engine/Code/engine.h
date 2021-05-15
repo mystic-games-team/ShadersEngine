@@ -230,6 +230,7 @@ struct App
 
     // program indices
     u32 texturedMeshProgramIdx;
+    u32 lightProgramIdx;
 
     // Model
     u32 patrick;

@@ -127,7 +127,7 @@ void main()
 
 //////////////
 
-#ifdef DEF
+#ifdef DEF_GEOMETRY
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
@@ -155,7 +155,7 @@ void main()
 {
     gl_Position = uWorldViewProjectionMatrix * uWorldMatrix * vec4(aPosition, 1.0);
 
-    vPosition = uWorldMatrix * vec4(aPosition, 1.0);
+    vPosition = vec4(vec3(uWorldMatrix * vec4(aPosition, 1.0)), 1.0);
     vNormal = mat3(transpose(inverse(uWorldMatrix))) * aNormals;
     vTexCoord = aTexCoord;
     
@@ -190,6 +190,119 @@ void main() {
 
     gl_FragDepth = gl_FragCoord.z - 0.1;
 }
+
+#endif
+#endif
+
+///////////////////////////////////////////////
+
+
+#ifdef LIGHTNING
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location=0) in vec3 aPosition;
+layout(location=1) in vec2 aTexCoord;
+
+struct Light
+{
+    unsigned int    type;
+    vec3            color;
+    vec3            direction;
+    vec3            position;
+    float           intensity;
+    float           linear;
+    float           quadratic;
+};
+
+layout(binding = 0, std140) uniform GlobalParms
+{
+	vec3 			uCameraPos;
+ 	int 			uLightCount;
+ 	Light			uLight[16];
+};
+
+
+out vec2 vTexCoord;
+
+void main() {
+
+	gl_Position = vec4(aPosition, 1.0);
+
+	vTexCoord = aTexCoord;
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+struct Light
+{
+    unsigned int    type;
+    vec3            color;
+    vec3            direction;
+    vec3            position;
+    float           intensity;
+    float           linear;
+    float           quadratic;
+};
+
+vec3 CalculateDirectionalLight(Light light, vec3 vNormal, vec3 vViewDir) 
+{
+    vec3 lightDirection = normalize(-light.direction);
+    vec3 diffuse = light.color *  max(dot(lightDirection, vNormal), 0.0);
+    return (diffuse + diffuse * pow(max(dot(vNormal, normalize(lightDirection + vViewDir)), 0.0), 0.0) * 0.01) * light.intensity;
+}
+
+vec3 CalculatePointLight(Light light, vec3 vNormal, vec3 vPosition, vec3 vViewDir) 
+{
+    vec3 lightDirection = normalize(light.position - vPosition);
+    float distance = length(light.position - vPosition);
+    float attenuation = 1.0 / (1.0 + light.linear * distance + light.quadratic * distance * distance);      
+	return (light.color * max(dot(vNormal, lightDirection), 0.0) + light.color * pow(max(dot(vNormal, normalize(lightDirection + vViewDir)), 0.0), 14.0)) * light.intensity * attenuation;
+}
+
+layout(binding = 0, std140) uniform GlobalParms
+{
+	vec3 			uCameraPos;
+	int 			uLightCount;
+	Light			uLight[16];
+};
+
+uniform sampler2D uPositionTexture;
+uniform sampler2D uNormalsTexture;
+uniform sampler2D uAlbedoTexture;
+uniform sampler2D uDepthTexture;
+
+in vec2 vTexCoord;
+
+layout(location = 0) out vec4 oColor;
+
+void main() {
+
+	vec3 position = texture(uPositionTexture, vTexCoord).rgb;
+	vec3 normals = texture(uNormalsTexture, vTexCoord).rgb;
+	vec3 color = texture(uAlbedoTexture, vTexCoord).rgb;
+	float depth = texture(uDepthTexture, vTexCoord).r;
+
+	vec3 viewDir = normalize(uCameraPos - position);
+	vec3 finalColor = vec3(0.0,0.0,0.0);
+	
+	for(int i = 0; i < uLightCount; ++i) {			
+		if (depth < 1.0) {
+			if (uLight[i].type == 0) {
+				finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(viewDir));
+			}
+			else if (uLight[i].intensity > length(uLight[i].position - position)) {
+					finalColor += CalculatePointLight(uLight[i], normals, position, viewDir);
+			}
+		}
+		else {
+			finalColor = vec3(0.2);
+		}
+	}
+
+	oColor = vec4(finalColor + color * 0.2, 1.0);
+}
+
 
 #endif
 #endif

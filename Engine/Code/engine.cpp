@@ -182,7 +182,7 @@ u32 LoadTexture2D(App* app, const char* filepath)
 
 void Init(App* app)
 {
-    app->mode = Mode::Mode_Forward;
+    app->mode = Mode::Mode_Deferred;
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
@@ -574,19 +574,19 @@ void Render(App* app)
 
             glUseProgram(app->programs[app->lightProgramIdx].handle);
 
-            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uPositionTexture"), 0);
+            glUniform1i(glGetUniformLocation(app->programs[app->lightProgramIdx].handle, "uPositionTexture"), 0);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, app->positionsAttachment);
             
-            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uNormalsTexture"), 1);
+            glUniform1i(glGetUniformLocation(app->programs[app->lightProgramIdx].handle, "uNormalsTexture"), 1);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, app->normalsAttachment);
             
-            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uAlbedoTexture"), 2);
+            glUniform1i(glGetUniformLocation(app->programs[app->lightProgramIdx].handle, "uAlbedoTexture"), 2);
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, app->albedoAttachment);
             
-            glUniform1i(glGetUniformLocation(app->lightProgramIdx, "uDepthTexture"), 3);
+            glUniform1i(glGetUniformLocation(app->programs[app->lightProgramIdx].handle, "uDepthTexture"), 3);
             glActiveTexture(GL_TEXTURE3);
             glBindTexture(GL_TEXTURE_2D, app->depthAttachment);
 
@@ -615,8 +615,6 @@ void Render(App* app)
             glBindBufferRange(GL_UNIFORM_BUFFER, 0, app->cbuffer.handle, app->globalParamsOffset, app->globalParamsSize);
 
             UnmapBuffer(app->cbuffer);
-
-            glActiveTexture(GL_TEXTURE0);
 
             renderQuad();
             break; }

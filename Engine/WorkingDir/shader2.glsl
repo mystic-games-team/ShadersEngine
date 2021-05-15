@@ -197,7 +197,7 @@ void main() {
 ///////////////////////////////////////////////
 
 
-#ifdef LIGHTNING
+#ifdef LIGHTING
 
 #if defined(VERTEX) ///////////////////////////////////////////////////
 
@@ -287,20 +287,22 @@ void main() {
     vec3 finalColor = vec3(0.0);
     for (int i = 0; i < uLightCount; ++i)
     {
-        switch (uLight[i].type)
+        if (depth < 1.0)
         {
-            case 0:
-                finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
-            break;
-            case 1:
-                finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
-            break;
+            switch (uLight[i].type)
+            {
+                case 0:
+                    finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
+                break;
+                case 1:
+                    finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
+                break;
+            }
         }
     }
 
     oColor = vec4(finalColor, 1.0) + vec4(color, 1) * 0.2;
 
-    gl_FragDepth = gl_FragCoord.z - 0.1;
 }
 
 #endif

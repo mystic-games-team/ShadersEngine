@@ -264,6 +264,8 @@ struct App
     u32 globalParamsSize;
 
     std::vector<Light> lights;
+
+    bool renderLightGuizmos = true;
 };
 
 void Init(App* app);
@@ -278,3 +280,4 @@ u32 LoadTexture2D(App* app, const char* filepath);
 
 GLuint FindVAO(Mesh& mesh, u32 submeshIndex, const Program& program);
 
+void renderSphere();

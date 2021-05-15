@@ -219,7 +219,7 @@ void Init(App* app)
     app->entities.emplace_back(vec3(0, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
     app->entities.emplace_back(vec3(-2.5F, 0.0F, 0), vec3(1, 1, 1), app->patrick);
     app->entities.emplace_back(vec3(2.5F, 0.0F, 0.0F), vec3(1, 1, 1), app->patrick);
-    app->entities.emplace_back(vec3(0, -3.0f, 0.0F), vec3(5, 0.2f, 5), app->cube);
+    //app->entities.emplace_back(vec3(0, -3.0f, 0.0F), vec3(5, 0.2f, 5), app->cube);
 
     app->mainCam = new Camera();
 
@@ -318,8 +318,8 @@ void Init(App* app)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     app->lights.push_back(Light(LightType::Point, vec3(1.0F, 0.3F, 0.3F), vec3(-1, 0, 0), vec3(0, 0, 3), 5));
-    app->lights.push_back(Light(LightType::Point, vec3(0, 1, 0), vec3(-1, 0, 0), vec3(-4, 0, 1), 1));
-    app->lights.push_back(Light(LightType::Directional, vec3(0, 0, 1.0F), vec3(-1, 0, 1), vec3(3, 0, 3), 1));
+    app->lights.push_back(Light(LightType::Point, vec3(0, 1, 0), vec3(-1, 0, 0), vec3(-2, 0, 3.5), 8));
+    app->lights.push_back(Light(LightType::Directional, vec3(0, 0, 1.0F), vec3(-1, 0, 1), vec3(3, 0, 3), 3));
 }
 
 void Gui(App* app)

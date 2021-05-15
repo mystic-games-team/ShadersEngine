@@ -215,13 +215,12 @@ struct Light
     float           quadratic;
 };
 
-layout(binding = 0, std140) uniform GlobalParms
+layout(binding = 0, std140) uniform GlobalParams
 {
-	vec3 			uCameraPos;
- 	int 			uLightCount;
- 	Light			uLight[16];
+    vec3            uCameraPosition;
+    unsigned int    uLightCount;
+    Light           uLight[16];
 };
-
 
 out vec2 vTexCoord;
 
@@ -260,17 +259,17 @@ vec3 CalculatePointLight(Light light, vec3 vNormal, vec3 vPosition, vec3 vViewDi
 	return (light.color * max(dot(vNormal, lightDirection), 0.0) + light.color * pow(max(dot(vNormal, normalize(lightDirection + vViewDir)), 0.0), 14.0)) * light.intensity * attenuation;
 }
 
-layout(binding = 0, std140) uniform GlobalParms
-{
-	vec3 			uCameraPos;
-	int 			uLightCount;
-	Light			uLight[16];
-};
-
 uniform sampler2D uPositionTexture;
 uniform sampler2D uNormalsTexture;
 uniform sampler2D uAlbedoTexture;
 uniform sampler2D uDepthTexture;
+
+layout(binding = 0, std140) uniform GlobalParams
+{
+    vec3            uCameraPosition;
+    unsigned int    uLightCount;
+    Light           uLight[16];
+};
 
 in vec2 vTexCoord;
 
@@ -283,7 +282,7 @@ void main() {
 	vec3 color = texture(uAlbedoTexture, vTexCoord).rgb;
 	float depth = texture(uDepthTexture, vTexCoord).r;
 
-	vec3  vViewDir = uCameraPos - position;
+	vec3  vViewDir = uCameraPosition - position;
 	vec3 finalColor = vec3(0.0,0.0,0.0);
 	
 	for(int i = 0; i < uLightCount; ++i) {			
@@ -291,12 +290,12 @@ void main() {
 			if (uLight[i].type == 0) {
 				finalColor += CalculateDirectionalLight(uLight[i], normals, normalize(vViewDir));
 			}
-			else if (uLight[i].intensity > length(uLight[i].position - position)) {
-					finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
+			else {
+				finalColor += CalculatePointLight(uLight[i], normals, position, normalize(vViewDir));
 			}
 		}
 		else {
-			finalColor = vec3(0.2);
+			finalColor = vec3(0.1);
 		}
 	}
 

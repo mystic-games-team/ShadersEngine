@@ -18,7 +18,8 @@ enum TextureTypes
 {
     AlbedoColor,
     DepthBuffer,
-    NormalsBuffer
+    NormalsBuffer,
+    PositionBuffer
 };
 
 struct Image
@@ -232,6 +233,7 @@ struct App
     GLuint depthAttachment;
     GLuint normalsAttachment;
     GLuint albedoAttachment;
+    GLuint positionsAttachment;
 
     GLint maxUniformBufferSize;
     GLint uniformBlockAlignment;

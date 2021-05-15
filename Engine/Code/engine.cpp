@@ -256,7 +256,6 @@ void Init(App* app)
 
     app->mainCam = new Camera();
 
-
     glGenTextures(1, &app->colorAttachment);
     glBindTexture(GL_TEXTURE_2D, app->colorAttachment);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -297,12 +296,23 @@ void Init(App* app)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
+    glGenTextures(1, &app->positionsAttachment);
+    glBindTexture(GL_TEXTURE_2D, app->positionsAttachment);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, app->displaySize.x, app->displaySize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     glGenFramebuffers(1, &app->frameBuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, app->colorAttachment, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, app->depthAttachment, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, app->normalsAttachment, 0);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, app->albedoAttachment, 0);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, app->positionsAttachment, 0);
 
     GLenum framebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (framebufferStatus != GL_FRAMEBUFFER_COMPLETE) {
@@ -354,7 +364,7 @@ void Gui(App* app)
     ImGui::Text("Camera Pos Y: %f", app->mainCam->cameraPos.y);
     ImGui::Text("Camera Pos Z: %f", app->mainCam->cameraPos.z);
     ImGui::Text("------------------");
-    ImGui::Combo("Painted Texture", (int*)&app->currentTextureType, "Albedo Color\0Depth Buffer\0Normals Buffer");
+    ImGui::Combo("Painted Texture", (int*)&app->currentTextureType, "Albedo Color\0Depth Buffer\0Normals Buffer\0Positions");
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 2.5F));
     ImGui::AlignTextToFramePadding();
     ImGui::PopStyleVar();
@@ -376,6 +386,9 @@ void Gui(App* app)
         break; }
     case TextureTypes::NormalsBuffer: {
         ImGui::Image((ImTextureID)app->normalsAttachment, ImVec2(app->displaySize.x, app->displaySize.y), ImVec2(0, 1), ImVec2(1, 0));
+        break; }
+    case TextureTypes::PositionBuffer: {
+        ImGui::Image((ImTextureID)app->positionsAttachment, ImVec2(app->displaySize.x, app->displaySize.y), ImVec2(0, 1), ImVec2(1, 0));
         break; }
     }
 
@@ -423,7 +436,7 @@ void Render(App* app)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, app->frameBuffer);
 
-    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+    GLuint drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
     glDrawBuffers(ARRAY_COUNT(drawBuffers), drawBuffers);
 
     glClearColor(0.1F, 0.1F, 0.1F, 1.0F);

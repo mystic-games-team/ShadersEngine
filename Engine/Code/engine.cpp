@@ -321,9 +321,14 @@ void Init(App* app)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     app->lights.push_back(Light(LightType::Directional, vec3(1.0F, 0.1f, 0.5f), vec3(-3, -1, -2), vec3(3, 1, 2), 0.5f));
-    app->lights.push_back(Light(LightType::Point, vec3(1.0F, 0.3F, 0.3F), vec3(-1, 0, 0), vec3(0, 0, 3), 2));
+    app->lights.push_back(Light(LightType::Directional, vec3(0, 1, 1.0F), vec3(-1, 0, 1), vec3(3, 0, -3), 0.5));
+    app->lights.push_back(Light(LightType::Point, vec3(1.0F, 0.3F, 0.3F), vec3(-1, 0, 0), vec3(1, 0, 3), 2));
     app->lights.push_back(Light(LightType::Point, vec3(0, 1, 0), vec3(-1, 0, 0), vec3(-2, 0, 3.5), 4));
-    app->lights.push_back(Light(LightType::Directional, vec3(0, 0, 1.0F), vec3(-1, 0, 1), vec3(3, 0, 3), 1));
+    app->lights.push_back(Light(LightType::Point, vec3(1, 1, 0), vec3(-1, 0, 0), vec3(-1, -3, 2.5), 4));
+    app->lights.push_back(Light(LightType::Point, vec3(1, 1, 1), vec3(-1, 0, 0), vec3(-1, -3, -2.5), 4));
+    app->lights.push_back(Light(LightType::Point, vec3(1, 0, 1), vec3(-1, 0, 0), vec3(-1, 3, -2.5), 4));
+    app->lights.push_back(Light(LightType::Point, vec3(0.5, 1, 0), vec3(-1, 0, 0), vec3(-3, 2, 2.5), 1));
+    app->lights.push_back(Light(LightType::Point, vec3(0.5, 0.5, 1), vec3(-1, 0, 0), vec3(5, 2, 2.5), 5));
 }
 
 void Gui(App* app)
@@ -624,7 +629,7 @@ void Render(App* app)
         renderQuad();
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glBlitFramebuffer(
             0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST
         );

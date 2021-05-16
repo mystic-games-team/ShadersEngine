@@ -9,6 +9,7 @@ We have two modes rendering modes implemented, Forward and Deferred, which can b
 Deferred Rendering is set by default.
 Render to texture is also implemented and we have a secondary screen which shows the Difusse texture, the Depth texture, the Normals texture or the positions texture.
 
+Point Lights are showed with a Sphere Guizmo and Directional Lights are showed with a Quad Guizmo.
 
 We have an FPV camera to move and look around:
 

@@ -639,7 +639,7 @@ void Render(App* app)
             mat = glm::scale(mat, vec3(0.5f));
             glUniformMatrix4fv(glGetUniformLocation(app->programs[app->gizmosProgramIdx].handle, "model"), 1, GL_FALSE, glm::value_ptr(mat));
             glUniform3fv(glGetUniformLocation(app->programs[app->gizmosProgramIdx].handle, "lightColor"), 1, glm::value_ptr(app->lights[i].color));
-            renderSphere();
+            app->lights[i].type == LightType::Point ? renderSphere() : renderQuad();
         }
         break; }
     }

@@ -210,6 +210,10 @@ void Init(App* app)
         Program& light = app->programs[app->lightProgramIdx];
         light.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         light.vertexInputLayout.attributes.push_back({ 1, 2 }); // texCoord
+
+        app->gizmosProgramIdx = LoadProgram(app, "shader2.glsl", "GIZMOS");
+        Program& gizmos = app->programs[app->gizmosProgramIdx];
+        gizmos.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
         break; 
     }
     }
@@ -618,9 +622,26 @@ void Render(App* app)
         UnmapBuffer(app->cbuffer);
 
         renderQuad();
-        glBindVertexArray(0);
-        glUseProgram(0);
-    }
+
+        glBindFramebuffer(GL_READ_FRAMEBUFFER, app->frameBuffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+        glBlitFramebuffer(
+            0, 0, app->displaySize.x, app->displaySize.y, 0, 0, app->displaySize.x, app->displaySize.y, GL_DEPTH_BUFFER_BIT, GL_NEAREST
+        );
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        glUseProgram(app->programs[app->gizmosProgramIdx].handle);
+
+        glUniformMatrix4fv(glGetUniformLocation(app->programs[app->gizmosProgramIdx].handle, "projectionView"), 1, GL_FALSE, glm::value_ptr(glm::perspective(glm::radians(60.0f), (float)app->displaySize.x / (float)app->displaySize.y, 0.1f, 2000.0f)* app->mainCam->viewMatrix));
+        for (unsigned int i = 0; i < app->lights.size(); ++i) {
+            glm::mat4 mat = glm::mat4(1.f);
+            mat = glm::translate(mat, app->lights[i].position);
+            mat = glm::scale(mat, vec3(0.5f));
+            glUniformMatrix4fv(glGetUniformLocation(app->programs[app->gizmosProgramIdx].handle, "model"), 1, GL_FALSE, glm::value_ptr(mat));
+            glUniform3fv(glGetUniformLocation(app->programs[app->gizmosProgramIdx].handle, "lightColor"), 1, glm::value_ptr(app->lights[i].color));
+            renderSphere();
+        }
+        break; }
     }
 }
 

@@ -231,6 +231,7 @@ struct App
     // program indices
     u32 texturedMeshProgramIdx;
     u32 lightProgramIdx;
+    u32 gizmosProgramIdx;
 
     // Model
     u32 patrick;

@@ -188,7 +188,7 @@ void main() {
     oAlbedo = texture(uTexture, vTexCoord);
     oPosition = vPosition;
 
-    gl_FragDepth = gl_FragCoord.z - 0.1;
+    gl_FragDepth = gl_FragCoord.z - 0.2;
 }
 
 #endif
@@ -307,3 +307,31 @@ void main() {
 
 #endif
 #endif
+
+#ifdef GIZMOS
+
+#if defined(VERTEX) ///////////////////////////////////////////////////
+
+layout(location=0) in vec3 aPosistion;
+
+uniform mat4 projectionView;
+uniform mat4 model;
+
+void main() {
+	gl_Position = projectionView * model * vec4(aPosistion, 1.0);
+}
+
+#elif defined(FRAGMENT) ///////////////////////////////////////////////
+
+layout(location = 0) out vec4 oColor;
+
+uniform vec3 lightColor;
+
+void main() {
+	oColor = vec4(lightColor, 0.6);
+    gl_FragDepth = gl_FragCoord.z - 0.2;
+}
+
+#endif
+#endif
+

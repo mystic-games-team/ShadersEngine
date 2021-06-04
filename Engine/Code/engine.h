@@ -269,7 +269,9 @@ struct App
     bool renderLightGuizmos = true;
 };
 
-void Init(App* app);
+void Init(App* app, Mode mode);
+
+void ModesLoad(App* app);
 
 void Gui(App* app);
 

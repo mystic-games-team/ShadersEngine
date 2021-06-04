@@ -180,43 +180,16 @@ u32 LoadTexture2D(App* app, const char* filepath)
     }
 }
 
-void Init(App* app)
+void Init(App* app, Mode mode)
 {
-    app->mode = Mode::Mode_Deferred;
+    app->mode = mode;
 
     glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &app->maxUniformBufferSize);
     glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, &app->uniformBlockAlignment);
 
     app->cbuffer = CreateBuffer(app->maxUniformBufferSize, GL_UNIFORM_BUFFER, GL_STREAM_DRAW);
 
-    switch (app->mode) {
-    case Mode::Mode_Forward: {
-        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
-        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
-        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
-        break; }
-    case Mode::Mode_Deferred: {
-        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "DEF_GEOMETRY");
-        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
-        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
-        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
-
-        app->lightProgramIdx = LoadProgram(app, "shader2.glsl", "LIGHTING");
-        Program& light = app->programs[app->lightProgramIdx];
-        light.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
-        light.vertexInputLayout.attributes.push_back({ 1, 2 }); // texCoord
-
-        app->gizmosProgramIdx = LoadProgram(app, "shader2.glsl", "GIZMOS");
-        Program& gizmos = app->programs[app->gizmosProgramIdx];
-        gizmos.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
-        break; 
-    }
-    }
+    ModesLoad(app);
 
     app->patrick = LoadModel(app, "Patrick/Patrick.obj");
 
@@ -331,6 +304,38 @@ void Init(App* app)
     app->lights.push_back(Light(LightType::Point, vec3(0.5, 0.5, 1), vec3(-1, 0, 0), vec3(5, 2, 2.5), 5));
 }
 
+void ModesLoad(App* app)
+{
+    switch (app->mode) {
+    case Mode::Mode_Forward: {
+        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "SHOW_TEXTURED_MESH");
+        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+        break; }
+    case Mode::Mode_Deferred: {
+        app->texturedMeshProgramIdx = LoadProgram(app, "shader2.glsl", "DEF_GEOMETRY");
+        Program& texturedMeshProgram = app->programs[app->texturedMeshProgramIdx];
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 1, 3 }); // normals
+        texturedMeshProgram.vertexInputLayout.attributes.push_back({ 2, 2 }); // texCoord
+        app->programUniformTexture = glGetUniformLocation(texturedMeshProgram.handle, "uTexture");
+
+        app->lightProgramIdx = LoadProgram(app, "shader2.glsl", "LIGHTING");
+        Program& light = app->programs[app->lightProgramIdx];
+        light.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        light.vertexInputLayout.attributes.push_back({ 1, 2 }); // texCoord
+
+        app->gizmosProgramIdx = LoadProgram(app, "shader2.glsl", "GIZMOS");
+        Program& gizmos = app->programs[app->gizmosProgramIdx];
+        gizmos.vertexInputLayout.attributes.push_back({ 0, 3 }); // position
+        break;
+    }
+    }
+}
+
 void Gui(App* app)
 {
     ImGui::Begin("Info");
@@ -348,6 +353,10 @@ void Gui(App* app)
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 2.5F));
     ImGui::AlignTextToFramePadding();
     ImGui::PopStyleVar();
+
+    if (ImGui::Combo("Rendering Mode", (int*)&app->mode, "Forward\0Deferred")) {
+        ModesLoad(app);
+    }
 
     switch (app->currentTextureType) {
     case TextureTypes::AlbedoColor: {

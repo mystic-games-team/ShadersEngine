@@ -201,7 +201,7 @@ int main()
 
     GlobalFrameArenaMemory = (u8*)malloc(GLOBAL_FRAME_ARENA_SIZE);
 
-    Init(&app);
+    Init(&app, Mode::Mode_Deferred);
 
     while (app.isRunning)
     {
